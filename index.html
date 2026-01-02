@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Stretchy Circle + Draggable Square</title>
+<style>
+  html,body {
+    height:100%;
+    margin:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#f4f4f4;
+  }
+
+  .stage {
+    width: 90vw;
+    max-width: 600px;
+    height: 60vh;
+    max-height: 500px;
+    border: 2px dashed #bbb;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+    touch-action: none;
+  }
+
+  .circle, .square {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: system-ui, sans-serif;
+    color: white;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00aaff, #004488);
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale3d(1, 1, 1);
+  }
+
+  .square {
+    width: 90px;
+    height: 90px;
+    border-radius: 15px;
+    background: linear-gradient(135deg, #ff9933, #cc5500);
+    right: 40px;
+    bottom: 40px;
+  }
+
+  @keyframes bounceBack {
+    0% { transform: translate(-50%, -50%) scale3d(1.15, 0.85, 1); }
+    40% { transform: translate(-50%, -50%) scale3d(0.9, 1.1, 1); }
+    70% { transform: translate(-50%, -50%) scale3d(1.05, 0.95, 1); }
+    100% { transform: translate(-50%, -50%) scale3d(1, 1, 1); }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <div class="circle" id="circle">Circle</div>
+  <div class="square" id="square">Square</div>
+</div>
+
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const circle = document.getElementById('circle');
+  const square = document.getElementById('square');
+
+  // --- Draggable square (moves freely)
+  function makeDraggable(el) {
+    let isDragging = false;
+    let startX = 0, startY = 0, origX = 0, origY = 0;
+
+    function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+    function getCoords(e) {
+      if (e.touches && e.touches[0]) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      return { x: e.clientX, y: e.clientY };
+    }
+
+    el.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      const pt = getCoords(e);
+      isDragging = true;
+      startX = pt.x; startY = pt.y;
+      const rect = el.getBoundingClientRect();
+      const parentRect = stage.getBoundingClientRect();
+      origX = rect.left - parentRect.left;
+      origY = rect.top - parentRect.top;
+      el.style.cursor = 'grabbing';
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
+    });
+
+    function onMove(e) {
+      if (!isDragging) return;
+      const pt = getCoords(e);
+      const dx = pt.x - startX;
+      const dy = pt.y - startY;
+      const newX = clamp(origX + dx, 0, stage.clientWidth - el.offsetWidth);
+      const newY = clamp(origY + dy, 0, stage.clientHeight - el.offsetHeight);
+      el.style.left = `${newX}px`;
+      el.style.top = `${newY}px`;
+    }
+
+    function onUp() {
+      if (!isDragging) return;
+      isDragging = false;
+      el.style.cursor = 'grab';
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
+    }
+  }
+
+  makeDraggable(square);
+
+  // --- Stretchy circle (stays in place)
+  (() => {
+    let isDragging = false;
+    let startX = 0, startY = 0;
+
+    function getCoords(e) {
+      if (e.touches && e.touches[0]) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      return { x: e.clientX, y: e.clientY };
+    }
+
+    circle.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      const pt = getCoords(e);
+      startX = pt.x; startY = pt.y;
+      isDragging = true;
+      circle.style.transition = 'transform 0.05s';
+      circle.style.cursor = 'grabbing';
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
+    });
+
+    function onMove(e) {
+      if (!isDragging) return;
+      const pt = getCoords(e);
+      const dx = pt.x - startX;
+      const dy = pt.y - startY;
+      const stretchX = 1 + Math.abs(dx) / 200;
+      const stretchY = 1 - Math.abs(dy) / 300;
+      circle.style.transform = `translate(-50%, -50%) scale3d(${stretchX}, ${stretchY}, 1)`;
+    }
+
+    function onUp() {
+      if (!isDragging) return;
+      isDragging = false;
+      circle.style.transition = '';
+      circle.style.cursor = 'grab';
+      circle.style.animation = 'bounceBack 0.6s ease-out';
+      circle.addEventListener('animationend', () => {
+        circle.style.animation = '';
+        circle.style.transform = 'translate(-50%, -50%) scale3d(1,1,1)';
+      }, { once: true });
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
+    }
+  })();
+})();
+</script>
+
+</body>
+</html>
