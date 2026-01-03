@@ -1,136 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Search</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: white;
-      color: #202124;
-    }
-
-    .center {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 180px;
-    }
-
-    .logo {
-      font-size: 92px;
-      font-weight: bold;
-      letter-spacing: -5px;
-      margin-bottom: 20px;
-    }
-
-    .logo span:nth-child(1) { color: #4285F4; }
-    .logo span:nth-child(2) { color: #DB4437; }
-    .logo span:nth-child(3) { color: #F4B400; }
-    .logo span:nth-child(4) { color: #4285F4; }
-    .logo span:nth-child(5) { color: #0F9D58; }
-    .logo span:nth-child(6) { color: #DB4437; }
-
-    input {
-      width: 540px;
-      height: 44px;
-      border-radius: 24px;
-      border: 1px solid #dfe1e5;
-      padding: 0 20px;
-      font-size: 16px;
-      outline: none;
-    }
-
-    input:hover, input:focus {
-      box-shadow: 0 1px 6px rgba(32,33,36,.28);
-    }
-
-    .buttons {
-      margin-top: 30px;
-    }
-
-    button {
-      background: #f8f9fa;
-      border: 1px solid #f8f9fa;
-      padding: 10px 18px;
-      margin: 0 6px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    button:hover {
-      border: 1px solid #dadce0;
-    }
-
-    .results {
-      max-width: 640px;
-      margin: 40px auto;
-      display: none;
-    }
-
-    .result {
-      margin-bottom: 30px;
-    }
-
-    .result a {
-      color: #1a0dab;
-      font-size: 18px;
-      text-decoration: none;
-    }
-
-    .result a:hover {
-      text-decoration: underline;
-    }
-
-    .url {
-      color: #006621;
-      font-size: 14px;
-    }
-
-    .desc {
-      font-size: 14px;
-      color: #4d5156;
-    }
-  </style>
+<title>My Search Engine</title>
+<style>
+body { font-family: Arial; padding: 40px; }
+input { width: 400px; height: 36px; font-size: 16px; }
+.result { margin-top: 20px; }
+a { font-size: 18px; color: #1a0dab; text-decoration: none; }
+</style>
 </head>
 <body>
 
-  <div class="center" id="home">
-    <div class="logo">
-      <span>S</span><span>e</span><span>a</span><span>r</span><span>c</span><span>h</span>
-    </div>
-    <input id="query" placeholder="Search…" />
-    <div class="buttons">
-      <button onclick="search()">Search</button>
-      <button onclick="lucky()">I'm Feeling Lucky</button>
-    </div>
-  </div>
+<h1>Search</h1>
+<input id="q" placeholder="Search…" onkeydown="if(event.key==='Enter')search()">
+<div id="results"></div>
 
-  <div class="results" id="results">
-    <div class="result">
-      <a href="#">Example Result One</a>
-      <div class="url">example.com</div>
-      <div class="desc">This is a fake search result for demonstration purposes.</div>
-    </div>
-    <div class="result">
-      <a href="#">Example Result Two</a>
-      <div class="url">example.org</div>
-      <div class="desc">Another placeholder result, just like Google but safe.</div>
-    </div>
-  </div>
+<script>
+async function search() {
+  const q = document.getElementById("q").value;
+  const res = await fetch(`/search?q=${encodeURIComponent(q)}`);
+  const data = await res.json();
 
-  <script>
-    function search() {
-      document.getElementById("home").style.display = "none";
-      document.getElementById("results").style.display = "block";
-    }
-
-    function lucky() {
-      alert("You feel lucky today 🙂");
-    }
-  </script>
+  results.innerHTML = "";
+  data.forEach(r => {
+    results.innerHTML += `
+      <div class="result">
+        <a href="${r.url}" target="_blank">${r.title}</a>
+      </div>`;
+  });
+}
+</script>
 
 </body>
 </html>
