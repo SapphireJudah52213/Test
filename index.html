@@ -1,116 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Pure Clear Refraction</title>
+  <meta charset="UTF-8">
+  <title>Search</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: white;
+      color: #202124;
+    }
 
-<style>
-html, body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background: #000;
-}
+    .center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 180px;
+    }
 
-.scene {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
+    .logo {
+      font-size: 92px;
+      font-weight: bold;
+      letter-spacing: -5px;
+      margin-bottom: 20px;
+    }
 
-/* High-detail background so refraction is visible */
-.background {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 25% 30%, #6dd5fa, transparent 45%),
-    radial-gradient(circle at 75% 65%, #fbc2eb, transparent 45%),
-    linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-  filter: saturate(150%) contrast(120%);
-}
+    .logo span:nth-child(1) { color: #4285F4; }
+    .logo span:nth-child(2) { color: #DB4437; }
+    .logo span:nth-child(3) { color: #F4B400; }
+    .logo span:nth-child(4) { color: #4285F4; }
+    .logo span:nth-child(5) { color: #0F9D58; }
+    .logo span:nth-child(6) { color: #DB4437; }
 
-/* COMPLETELY INVISIBLE GLASS */
-.glass {
-  position: absolute;
-  width: 260px;
-  height: 260px;
-  border-radius: 50%;
+    input {
+      width: 540px;
+      height: 44px;
+      border-radius: 24px;
+      border: 1px solid #dfe1e5;
+      padding: 0 20px;
+      font-size: 16px;
+      outline: none;
+    }
 
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+    input:hover, input:focus {
+      box-shadow: 0 1px 6px rgba(32,33,36,.28);
+    }
 
-  background: transparent;
-  border: none;
-  box-shadow: none;
+    .buttons {
+      margin-top: 30px;
+    }
 
-  backdrop-filter: blur(26px);
-  -webkit-backdrop-filter: blur(26px);
+    button {
+      background: #f8f9fa;
+      border: 1px solid #f8f9fa;
+      padding: 10px 18px;
+      margin: 0 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
 
-  filter: url(#refract);
-  cursor: grab;
-  touch-action: none;
-}
-</style>
+    button:hover {
+      border: 1px solid #dadce0;
+    }
+
+    .results {
+      max-width: 640px;
+      margin: 40px auto;
+      display: none;
+    }
+
+    .result {
+      margin-bottom: 30px;
+    }
+
+    .result a {
+      color: #1a0dab;
+      font-size: 18px;
+      text-decoration: none;
+    }
+
+    .result a:hover {
+      text-decoration: underline;
+    }
+
+    .url {
+      color: #006621;
+      font-size: 14px;
+    }
+
+    .desc {
+      font-size: 14px;
+      color: #4d5156;
+    }
+  </style>
 </head>
-
 <body>
-<div class="scene">
-  <div class="background"></div>
 
-  <!-- TRUE refraction -->
-  <svg width="0" height="0">
-    <filter id="refract">
-      <feTurbulence
-        type="fractalNoise"
-        baseFrequency="0.013"
-        numOctaves="2"
-        seed="5"
-        result="noise"
-      />
-      <feDisplacementMap
-        in="SourceGraphic"
-        in2="noise"
-        scale="30"
-        xChannelSelector="R"
-        yChannelSelector="G"
-      />
-    </filter>
-  </svg>
+  <div class="center" id="home">
+    <div class="logo">
+      <span>S</span><span>e</span><span>a</span><span>r</span><span>c</span><span>h</span>
+    </div>
+    <input id="query" placeholder="Search…" />
+    <div class="buttons">
+      <button onclick="search()">Search</button>
+      <button onclick="lucky()">I'm Feeling Lucky</button>
+    </div>
+  </div>
 
-  <div class="glass"></div>
-</div>
+  <div class="results" id="results">
+    <div class="result">
+      <a href="#">Example Result One</a>
+      <div class="url">example.com</div>
+      <div class="desc">This is a fake search result for demonstration purposes.</div>
+    </div>
+    <div class="result">
+      <a href="#">Example Result Two</a>
+      <div class="url">example.org</div>
+      <div class="desc">Another placeholder result, just like Google but safe.</div>
+    </div>
+  </div>
 
-<script>
-const glass = document.querySelector('.glass');
+  <script>
+    function search() {
+      document.getElementById("home").style.display = "none";
+      document.getElementById("results").style.display = "block";
+    }
 
-let dragging = false;
-let startX, startY, originX, originY;
+    function lucky() {
+      alert("You feel lucky today 🙂");
+    }
+  </script>
 
-glass.addEventListener('pointerdown', e => {
-  dragging = true;
-  glass.setPointerCapture(e.pointerId);
-  glass.style.cursor = 'grabbing';
-
-  const rect = glass.getBoundingClientRect();
-  startX = e.clientX;
-  startY = e.clientY;
-  originX = rect.left + rect.width / 2;
-  originY = rect.top + rect.height / 2;
-});
-
-document.addEventListener('pointermove', e => {
-  if (!dragging) return;
-
-  glass.style.left = originX + (e.clientX - startX) + 'px';
-  glass.style.top  = originY + (e.clientY - startY) + 'px';
-});
-
-document.addEventListener('pointerup', () => {
-  dragging = false;
-  glass.style.cursor = 'grab';
-});
-</script>
 </body>
 </html>
